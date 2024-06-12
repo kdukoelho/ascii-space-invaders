@@ -59,9 +59,14 @@ void init_world(){
 
 void display_world(){
     clear();
-    mvprintw(0, (SIZEX/2) - 3, "SCORE: %d\n", score);
+
+    // Obtem as dimensões da tela
+    int maxY, maxX;
+    getmaxyx(stdscr, maxY, maxX);
+
+    mvprintw(0, (maxX - 8) / 2, "SCORE: %d\n", score);
     for (int y = 0; y < SIZEY; y++) {
-        printw("|");
+        mvprintw(y + 1, (maxX - SIZEX) / 2, "|");
         for (int x = 0; x < SIZEX; x++){
             printw("%c", world[y][x]);
         }
@@ -74,5 +79,8 @@ int main(void){
     display_welcome();
     init_world();
     display_world();
+
+    getch();
+    endwin();
     return 0;
 }
