@@ -3,11 +3,12 @@
 #include <ncurses.h>
 #include <unistd.h>
 
-#define SIZEY 23
+#define SIZEY 22
 #define SIZEX 40
 
+char world[SIZEY][SIZEX];
 char player = 'A', playerLaser = '^';
-char enemy = 'Y', enemyShielded = 'O', enemyLaser = '!', explosion = 'X'; 
+char enemy = 'Y', enemyShielded = 'O', enemyLaser = '!', explosion = 'X';
 
 int score = 0, defeat = 0, laserReady = 1;
 void display_welcome(){
@@ -41,7 +42,37 @@ void display_welcome(){
     endwin();
 }
 
+void init_world(){
+    for (int x = 0; x < SIZEX; x++){
+        for (int y = 0; y < SIZEY; y++){
+            if ((y + 1) % 2 == 0 && y < 7 && x > 4 && x < SIZEX - 5 && x % 2 == 0){
+                world[y][x] = enemy;
+            } else if ((y + 1) % 2 == 0 && y >= 7 && y < 9 && x > 4 && x < SIZEX - 5 && x % 2 == 0){
+                world[y][x] = enemyShielded;
+            } else {
+                world[y][x] = ' ';
+            }
+        }
+    }
+    world[SIZEY - 1][SIZEX / 2] = player;
+}
+
+void display_world(){
+    clear();
+    mvprintw(0, (SIZEX/2) - 3, "SCORE: %d\n", score);
+    for (int y = 0; y < SIZEY; y++) {
+        printw("|");
+        for (int x = 0; x < SIZEX; x++){
+            printw("%c", world[y][x]);
+        }
+        printw("|\n");
+    }
+    refresh();
+}
+
 int main(void){
     display_welcome();
+    init_world();
+    display_world();
     return 0;
 }
