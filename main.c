@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <ncurses.h>
 #include <unistd.h>
+#include <time.h>
 
 #define SIZEY 22
 #define SIZEX 40
@@ -75,12 +76,34 @@ void display_world(){
     refresh();
 }
 
+void move_player(char keyPress){
+    for (int x = 0; x < SIZEX; x++){
+        if (world[SIZEY - 1][x + 1] == player && keyPress == 'a'){
+            world[SIZEY - 1][x] = player;
+            world[SIZEY - 1][x + 1] = ' ';
+            break;
+        }
+        if (world[SIZEY - 1][x - 1] == player && keyPress == 'd') {
+            world[SIZEY - 1][x] = player;
+            world[SIZEY - 1][x - 1] = ' ';
+            break;
+        }
+    }
+}
+
 int main(void){
+    srand(time(NULL));
+    
     display_welcome();
     init_world();
-    display_world();
-
-    getch();
-    endwin();
+    
+    char keyPress;
+    while (!defeat){
+        display_world();
+        keyPress = getch();
+        move_player(keyPress);
+    }
+    
+    endwin();   
     return 0;
 }
