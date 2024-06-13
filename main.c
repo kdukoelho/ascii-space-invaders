@@ -9,9 +9,13 @@
 
 char world[SIZEY][SIZEX];
 char player = 'A', playerLaser = '^';
-char enemy = 'Y', enemyShielded = 'O', enemyLaser = '!', explosion = 'X';
+char enemy = 'Y', enemyShielded = 'O', enemyLaser = '!', enemyDirection;
+char explosion = 'X';
 
-int score = 0, defeat = 0, laserReady = 1;
+int score = 0, defeat = 0;
+int laserReady = 1;
+int totalEnemies = 0, drop = 0;
+
 void display_welcome(){
     // Limpa o terminal
     printf("\033[2J\033[H");
@@ -48,8 +52,10 @@ void init_world(){
         for (int y = 0; y < SIZEY; y++){
             if ((y + 1) % 2 == 0 && y < 7 && x > 4 && x < SIZEX - 5 && x % 2 == 0){
                 world[y][x] = enemy;
+                totalEnemies++;
             } else if ((y + 1) % 2 == 0 && y >= 7 && y < 9 && x > 4 && x < SIZEX - 5 && x % 2 == 0){
                 world[y][x] = enemyShielded;
+                totalEnemies = totalEnemies + 2;
             } else {
                 world[y][x] = ' ';
             }
@@ -91,6 +97,71 @@ void move_player(char keyPress){
     }
 }
 
+void check_enemy_direction(){
+    // Percore o eixo y, verificando se o inimigo chegou nos limite do mundo.
+    for (int y = 0; y < SIZEY; y++){
+        if (world[y][0] == enemy){
+            enemyDirection = 'r';
+            drop = 1;
+            break;
+        }
+        if (world[y][SIZEX - 1] == enemy){
+            enemyDirection = 'l';
+            drop = 1;
+            break;
+        }
+    }
+}
+
+void update_enemies(int i, int enemySpeed){
+    if (i % enemySpeed == 0){
+
+        // Verifica a direção do inimigo.
+        if (enemyDirection == 'l'){
+
+            // Percore a matriz do mundo do jogo da direita para a esquerda.
+            for (int x = 0; x < SIZEX - 1; x++){
+                for (int y = 0; y < SIZEY; y++){
+                    if (drop && world[y - 1][x + 1] == enemy || world[y - 1][x + 1] == enemyShielded){
+                        world[y][x] = world[y - 1][x + 1]; // Move o inimigo para baixo.
+                        world[y - 1][x + 1] = ' '; // Limpa a posição anterior.
+                    } 
+                    else if (!drop && (world[y][x + 1] == enemy || world[y][x + 1] == enemyShielded)){
+                        world[y][x] = world[y][x + 1]; // Move o inimigo para baixo.
+                        world[y][x + 1] = ' '; // Limpa a posição anterior.
+                    }
+                }
+            }
+        }
+        else{
+
+            // Percore a matriz do mundo do jogo da esquerda para a direita.
+            for (int x = SIZEX - 1; x > 0; x--){
+                for (int y = 0; y < SIZEY; y++){
+            
+                    // Verifica se deve deixar o inimigo cair.
+                    if (drop && world[y - 1][x - 1] == enemy || world[y - 1][x - 1] == enemyShielded){ 
+                        world[y][x] = world[y - 1][x - 1]; // Move o inimigo para baixo.
+                        world[y - 1][x - 1] = ' '; // Limpa a posição anterior.
+                    } 
+                    else if (!drop && (world[y][x - 1] == enemy || world[y][x - 1] == enemyShielded)){
+                        world[y][x] = world[y][x - 1]; // Move o inimigo para a direita.
+                        world[y][x - 1] = ' '; // Limpa a posição anterior.
+                    }
+                }
+            }
+        }
+
+        // Verifica se algum inimigo chegou ao final do mundo.
+        for (int x = 0; x < SIZEX; x++){
+            if (world[SIZEY - 1][x] == enemy || world[SIZEY - 1][x] == enemyShielded){
+                defeat = 1; // Define a derrota como verdadeira.
+                break;
+            }
+        }
+    }
+}
+
 int main(void){
     srand(time(NULL));
     
@@ -98,10 +169,18 @@ int main(void){
     init_world();
     
     char keyPress;
+    int i = 0;
+    int currentEnemies = totalEnemies;
     while (!defeat){
+        int enemySpeed = 1 + 10 * currentEnemies / totalEnemies;
+        drop = 0;
         display_world();
+        check_enemy_direction();
+        update_enemies(i, enemySpeed);
         keyPress = getch();
         move_player(keyPress);
+        i++;
+        usleep(50000);
     }
     
     endwin();   
