@@ -7,14 +7,26 @@
 #define SIZEY 22
 #define SIZEX 40
 
-char world[SIZEY][SIZEX];
-char player = 'A', playerLaser = '^';
-char enemy = 'Y', enemyShielded = 'O', enemyLaser = '!', enemyDirection;
-char explosion = 'X';
+typedef struct{
+    char player, laser;
+    int laserStatus, 
+    score;
+} Player;
 
-int score = 0, defeat = 0;
-int laserReady = 1;
-int totalEnemies = 0, drop = 0;
+Player player = {'A', '^', 1, 0};
+
+typedef struct{
+    int total_enemies, drop, speed;
+    char enemy, shielded, laser, 
+    direction;
+
+} Enemy;
+
+Enemy enemy = {0, 0, 0, 'Y', 'O', '!', 'l'};
+
+char world[SIZEY][SIZEX];
+int defeat = 0;  
+char explosion = 'X';
 
 void display_welcome(){
     // Limpa o terminal
@@ -51,17 +63,17 @@ void init_world(){
     for (int x = 0; x < SIZEX; x++){
         for (int y = 0; y < SIZEY; y++){
             if ((y + 1) % 2 == 0 && y < 7 && x > 4 && x < SIZEX - 5 && x % 2 == 0){
-                world[y][x] = enemy;
-                totalEnemies++;
+                world[y][x] = enemy.enemy;
+                enemy.total_enemies++;
             } else if ((y + 1) % 2 == 0 && y >= 7 && y < 9 && x > 4 && x < SIZEX - 5 && x % 2 == 0){
-                world[y][x] = enemyShielded;
-                totalEnemies = totalEnemies + 2;
+                world[y][x] = enemy.shielded;
+                enemy.total_enemies = enemy.total_enemies + 2;
             } else {
                 world[y][x] = ' ';
             }
         }
     }
-    world[SIZEY - 1][SIZEX / 2] = player;
+    world[SIZEY - 1][SIZEX / 2] = player.player;
 }
 
 void display_world(){
@@ -71,7 +83,7 @@ void display_world(){
     int maxY, maxX;
     getmaxyx(stdscr, maxY, maxX);
 
-    mvprintw(0, (maxX - 8) / 2, "SCORE: %d\n", score);
+    mvprintw(0, (maxX - 8) / 2, "SCORE: %d\n", player.score);
     for (int y = 0; y < SIZEY; y++) {
         mvprintw(y + 1, (maxX - SIZEX) / 2, "|");
         for (int x = 0; x < SIZEX; x++){
@@ -84,13 +96,13 @@ void display_world(){
 
 void move_player(char keyPress){
     for (int x = 0; x < SIZEX; x++){
-        if (world[SIZEY - 1][x + 1] == player && keyPress == 'a'){
-            world[SIZEY - 1][x] = player;
+        if (world[SIZEY - 1][x + 1] == player.player && keyPress == 'a'){
+            world[SIZEY - 1][x] = player.player;
             world[SIZEY - 1][x + 1] = ' ';
             break;
         }
-        if (world[SIZEY - 1][x - 1] == player && keyPress == 'd') {
-            world[SIZEY - 1][x] = player;
+        if (world[SIZEY - 1][x - 1] == player.player && keyPress == 'd') {
+            world[SIZEY - 1][x] = player.player;
             world[SIZEY - 1][x - 1] = ' ';
             break;
         }
@@ -100,33 +112,33 @@ void move_player(char keyPress){
 void check_enemy_direction(){
     // Percore o eixo y, verificando se o inimigo chegou nos limite do mundo.
     for (int y = 0; y < SIZEY; y++){
-        if (world[y][0] == enemy){
-            enemyDirection = 'r';
-            drop = 1;
+        if (world[y][0] == enemy.enemy){
+            enemy.direction = 'r';
+            enemy.drop = 1;
             break;
         }
-        if (world[y][SIZEX - 1] == enemy){
-            enemyDirection = 'l';
-            drop = 1;
+        if (world[y][SIZEX - 1] == enemy.enemy){
+            enemy.direction = 'l';
+            enemy.drop = 1;
             break;
         }
     }
 }
 
-void update_enemies(int i, int enemySpeed){
-    if (i % enemySpeed == 0){
+void update_enemies(int i){
+    if (i % enemy.speed == 0){
 
         // Verifica a direção do inimigo.
-        if (enemyDirection == 'l'){
+        if (enemy.direction == 'l'){
 
             // Percore a matriz do mundo do jogo da direita para a esquerda.
             for (int x = 0; x < SIZEX - 1; x++){
                 for (int y = 0; y < SIZEY; y++){
-                    if (drop && world[y - 1][x + 1] == enemy || world[y - 1][x + 1] == enemyShielded){
+                    if (enemy.drop && world[y - 1][x + 1] == enemy.enemy || world[y - 1][x + 1] == enemy.shielded){
                         world[y][x] = world[y - 1][x + 1]; // Move o inimigo para baixo.
                         world[y - 1][x + 1] = ' '; // Limpa a posição anterior.
                     } 
-                    else if (!drop && (world[y][x + 1] == enemy || world[y][x + 1] == enemyShielded)){
+                    else if (!enemy.drop && (world[y][x + 1] == enemy.enemy || world[y][x + 1] == enemy.shielded)){
                         world[y][x] = world[y][x + 1]; // Move o inimigo para baixo.
                         world[y][x + 1] = ' '; // Limpa a posição anterior.
                     }
@@ -140,11 +152,11 @@ void update_enemies(int i, int enemySpeed){
                 for (int y = 0; y < SIZEY; y++){
             
                     // Verifica se deve deixar o inimigo cair.
-                    if (drop && world[y - 1][x - 1] == enemy || world[y - 1][x - 1] == enemyShielded){ 
+                    if (enemy.drop && world[y - 1][x - 1] == enemy.enemy || world[y - 1][x - 1] == enemy.shielded){ 
                         world[y][x] = world[y - 1][x - 1]; // Move o inimigo para baixo.
                         world[y - 1][x - 1] = ' '; // Limpa a posição anterior.
                     } 
-                    else if (!drop && (world[y][x - 1] == enemy || world[y][x - 1] == enemyShielded)){
+                    else if (!enemy.drop && (world[y][x - 1] == enemy.enemy || world[y][x - 1] == enemy.shielded)){
                         world[y][x] = world[y][x - 1]; // Move o inimigo para a direita.
                         world[y][x - 1] = ' '; // Limpa a posição anterior.
                     }
@@ -154,7 +166,7 @@ void update_enemies(int i, int enemySpeed){
 
         // Verifica se algum inimigo chegou ao final do mundo.
         for (int x = 0; x < SIZEX; x++){
-            if (world[SIZEY - 1][x] == enemy || world[SIZEY - 1][x] == enemyShielded){
+            if (world[SIZEY - 1][x] == enemy.enemy || world[SIZEY - 1][x] == enemy.shielded){
                 defeat = 1; // Define a derrota como verdadeira.
                 break;
             }
@@ -170,15 +182,19 @@ int main(void){
     
     char keyPress;
     int i = 0;
-    int currentEnemies = totalEnemies;
+    int currentEnemies = enemy.total_enemies;
     while (!defeat){
-        int enemySpeed = 1 + 10 * currentEnemies / totalEnemies;
-        drop = 0;
+        enemy.speed = 1 + 10 * currentEnemies / enemy.total_enemies;
+        enemy.drop = 0;
+        player.laserStatus++;
+
         display_world();
         check_enemy_direction();
-        update_enemies(i, enemySpeed);
+        update_enemies(i);
+        
         keyPress = getch();
         move_player(keyPress);
+        
         i++;
         usleep(50000);
     }
