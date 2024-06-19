@@ -109,6 +109,18 @@ void move_player(char keyPress){
     }
 }
 
+void player_laser(char keyPress){
+    // Verifica se a tecla 'm' foi pressionada e se o laser está pronto.
+    if (keyPress == 'm' && player.laserStatus > 2){
+        for (int x = 0; x < SIZEX; x++){ 
+            if (world[SIZEY-1][x] == player.player) { // Percorre o eixo dos X verificando a posição do player.
+                world[SIZEY-2][x] = player.laser; // Coloca o caracter correspondente ao laser imediatamente acima do player..
+                player.laserStatus = 0; // Define o status do laser como "não-pronto".
+            }
+        }
+    }
+}
+
 void check_enemy_direction(){
     // Percore o eixo y, verificando se o inimigo chegou nos limite do mundo.
     for (int y = 0; y < SIZEY; y++){
@@ -194,6 +206,7 @@ int main(void){
         
         keyPress = getch();
         move_player(keyPress);
+        player_laser(keyPress);
         
         i++;
         usleep(50000);
