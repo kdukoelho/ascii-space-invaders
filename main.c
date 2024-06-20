@@ -201,6 +201,42 @@ void update_enemies(int i){
     }
 }
 
+int enemies_laser(int i){
+    for (int x = 0; x < SIZEX; x++){
+        for (int y = 0; y < SIZEY; y++){
+
+            // Verifica se as condições de disparo do laser de inimigos foram atingidas.
+            if ((i % 5 == 0) && (world[y][x] == enemy.shielded | world[y][x] == enemy.enemy) 
+            && (rand() % 15) > 13 && world[y+1][x] != player.laser){
+                // Verifica se há inimigos abaixo da posição atual para decidir se pode disparar.
+                for (int yi = y + 1; yi < SIZEY; yi++){
+                    if (world[yi][x] == enemy.enemy || world[yi][x] == enemy.shielded){
+                        enemy.is_ready = 0;
+                        break;
+                    }
+                    enemy.is_ready = 1;
+                }
+
+                // Se nenhum inimigo estiver abaixo as condições de disparo são atendidas.
+                if (enemy.is_ready){
+                    world[y + 1][x] = enemy.laser;
+                }
+            }
+        }
+        for (int y = SIZEY - 2; y >= 0; y--){
+            if (i % 2 == 0){
+                if(world[y][x] == enemy.laser && (world[y + 1][x] != enemy.enemy && world[y + 1][x] != enemy.shielded)){
+                world[y + 1][x] = enemy.laser;
+                world[y][x] = ' ';
+                }
+                else if (world[y][x] == enemy.laser){
+                    world[y][x] = ' ';
+                }
+            }
+        }
+    }
+}
+
 
 void update_board(int i){
     check_enemy_direction();
@@ -264,7 +300,8 @@ int main(void){
         player.laserStatus++;
 
         display_world();
-        update_board();
+        update_board(i);
+        enemies_laser(i);
         
         keyPress = getch();
         move_player(keyPress);
