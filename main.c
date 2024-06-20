@@ -16,13 +16,13 @@ typedef struct{
 Player player = {'A', '^', 1, 0};
 
 typedef struct{
-    int total_enemies, drop, speed;
+    int total_enemies, current_enemies, drop, speed, is_ready;
     char enemy, shielded, laser, 
     direction;
 
 } Enemy;
 
-Enemy enemy = {0, 0, 0, 'Y', 'O', '!', 'l'};
+Enemy enemy = {0, 0, 0, 0, 0, 'Y', 'O', '!', 'l'};
 
 char world[SIZEY][SIZEX];
 int defeat = 0;  
@@ -113,12 +113,27 @@ void player_laser(char keyPress){
     // Verifica se a tecla 'm' foi pressionada e se o laser está pronto.
     if (keyPress == 'm' && player.laserStatus > 2){
         for (int x = 0; x < SIZEX; x++){ 
-            if (world[SIZEY-1][x] == player.player) { // Percorre o eixo dos X verificando a posição do player.
-                world[SIZEY-2][x] = player.laser; // Coloca o caracter correspondente ao laser imediatamente acima do player..
+            if (world[SIZEY-1][x] == player.player) {
+                world[SIZEY-2][x] = player.laser; // Coloca o caracter correspondente ao laser imediatamente acima do player.
                 player.laserStatus = 0; // Define o status do laser como "não-pronto".
             }
         }
     }
+
+    // Movimenta o laser o jogador pelo mundo.
+    for (int x = 0; x < SIZEX; x++){
+        if (world[1][x] == player.laser){
+            world[1][x] = ' ';
+        }
+        for (int y = 1; y < SIZEY; y++){
+            // Move o laser do jogador caso não haja colisão iminente com o laser inimigo.
+            if (world[y][x] == player.laser && world[y-1][x] != enemy.laser){
+                world[y][x] = ' ';
+                world[y - 1][x] = player.laser;
+            }
+        }
+    }
+
 }
 
 void check_enemy_direction(){
@@ -194,9 +209,9 @@ int main(void){
     
     char keyPress;
     int i = 0;
-    int currentEnemies = enemy.total_enemies;
+    enemy.current_enemies = enemy.total_enemies;
     while (!defeat){
-        enemy.speed = 1 + 10 * currentEnemies / enemy.total_enemies;
+        enemy.speed = 1 + 10 * enemy.current_enemies / enemy.total_enemies;
         enemy.drop = 0;
         player.laserStatus++;
 
