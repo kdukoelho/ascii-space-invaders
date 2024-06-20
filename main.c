@@ -201,6 +201,54 @@ void update_enemies(int i){
     }
 }
 
+
+void update_board(int i){
+    check_enemy_direction();
+    update_enemies(i);
+
+    for (int x = 0; x < SIZEX; x++){
+        for (int y = 0; y < SIZEY; y++){
+            
+            // Verifica se o laser do jogador atingiu um inimigo.
+            if (world[y][x] == player.laser && world[y - 1][x] == enemy.enemy){
+                world[y][x] = ' '; // Remove o laser da antiga posição.
+                world[y - 1][x] = explosion; // Inimigo morre.
+                enemy.current_enemies--;
+                player.score += 50;
+            }
+
+            // Verifica se o laser do jogador atingiu um inimigo com escudo.
+            else if (world[y][x] == player.laser && world[y - 1][x] == enemy.shielded){
+                world[y][x] = ' '; 
+                world[y - 1][x] = enemy.enemy; // Inimigo com escudo vira um inimigo simples.
+                enemy.current_enemies--;
+                player.score += 25;
+            }
+            
+            // Verifica se o laser do inimigo atingiu o laser jogador.
+            else if (world[y][x] == player.laser && world[y - 1][x] == enemy.laser){
+                world[y][x] = ' '; // Remove o laser do jogador.
+            }
+
+            // Remove as explosões.
+            else if (world[y][x] == explosion){
+                world[y][x] = ' ';
+            }
+
+            else if (world[SIZEY - 1][x] == enemy.laser && world[SIZEY - 1][x] != player.player){
+                world[SIZEY - 1][x] = ' ';
+            }
+
+            // Verifica se o laser inimigo antigiu o jogador.
+            else if ((i + 1) % 2 == 0 && world[y][x] == enemy.laser && world[y + 1][x] == player.player){
+                world[y + 1][x] = explosion;
+                world[y][x] = ' ';
+                defeat = 1;
+            }
+        }
+    }
+}
+
 int main(void){
     srand(time(NULL));
     
@@ -216,8 +264,7 @@ int main(void){
         player.laserStatus++;
 
         display_world();
-        check_enemy_direction();
-        update_enemies(i);
+        update_board();
         
         keyPress = getch();
         move_player(keyPress);
