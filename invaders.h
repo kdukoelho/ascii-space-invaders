@@ -9,10 +9,10 @@
 typedef struct{
     char player, laser;
     int laserStatus, 
-    score;
+    score, defeat;
 } Player;
 
-Player player = {'A', '^', 1, 0};
+Player player = {'A', '^', 1, 0, 0};
 
 typedef struct{
     int total_enemies, current_enemies, drop, speed, is_ready;
@@ -24,7 +24,6 @@ typedef struct{
 Enemy enemy = {0, 0, 0, 0, 0, 'Y', 'O', '!', 'l'};
 
 char world[SIZEY][SIZEX];
-int defeat = 0;  
 char explosion = 'X';
 
 void display_welcome(){
@@ -55,7 +54,6 @@ void display_welcome(){
 
     // Limpa a tela
     clear();
-    endwin();
 }
 
 void init_world(){
@@ -193,7 +191,7 @@ void update_enemies(int i){
         // Verifica se algum inimigo chegou ao final do mundo.
         for (int x = 0; x < SIZEX; x++){
             if (world[SIZEY - 1][x] == enemy.enemy || world[SIZEY - 1][x] == enemy.shielded){
-                defeat = 1; // Define a derrota como verdadeira.
+                player.defeat = 1; // Define a derrota como verdadeira.
                 break;
             }
         }
@@ -278,8 +276,32 @@ void update_board(int i){
             else if ((i + 1) % 2 == 0 && world[y][x] == enemy.laser && world[y + 1][x] == player.player){
                 world[y + 1][x] = explosion;
                 world[y][x] = ' '; 
-                defeat = 1;
+                player.defeat = 1;
+                break;
             }
         }
     }
+}
+
+void finalize_game(){
+    clear(); refresh();
+
+    int maxY, maxX;
+    getmaxyx(stdscr, maxY, maxX);
+
+    if (!player.defeat) {
+        mvprintw((maxY / 2 + 1) - 4, (maxX / 2) - (24/2), "Bom trabalho, guerreiro!");
+        refresh(); sleep(1);
+        mvprintw((maxY / 2 + 2) - 4, (maxX / 2) - (40/2), "A orda de PROMPT INVADERS foi derrotada!");
+        refresh(); sleep(2);
+        mvprintw((maxY / 2 + 3) - 4, (maxX / 2) - (39/2), "Sua maquina agora, esta fora de perigo.");
+        refresh(); sleep(5);
+    } else{
+        mvprintw((maxY / 2 + 1) - 4, (maxX / 2) - (10/2), "PATETICO!");
+        refresh(); sleep(1);
+        mvprintw((maxY / 2 + 2) - 4, (maxX / 2) - (72/2), "Os PROMPT INVADERS venceram, sua maquina sera desligada imediatamente!");
+        refresh(); sleep(5);
+    }
+    
+    endwin();
 }
