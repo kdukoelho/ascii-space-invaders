@@ -239,6 +239,20 @@ void update_board(int i){
     check_enemy_direction();
     update_enemies(i);
 
+    int has_player = 0;
+    for (int x = 0; x < SIZEX; x++){
+        if (world[SIZEY - 1][x] == player.player){
+                has_player = 1;
+                break;
+            } else{
+                has_player = 0;
+            }
+    }
+
+    if (!has_player){
+        player.defeat = 1;
+    }
+
     for (int x = 0; x < SIZEX; x++){
         for (int y = 0; y < SIZEY; y++){
             
