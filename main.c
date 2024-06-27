@@ -23,7 +23,7 @@ int main(void){
         move_player(keyPress);
         player_laser(keyPress);
         
-        if (player.score >= 3375){
+        if (enemy.has_enemies == 0 || enemy.current_enemies == 0){
             break;
         }
 

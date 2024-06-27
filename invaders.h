@@ -15,13 +15,13 @@ typedef struct{
 Player player = {'A', '^', 1, 0, 0};
 
 typedef struct{
-    int total_enemies, current_enemies, drop, speed, is_ready;
+    int total_enemies, current_enemies, drop, speed, is_ready, has_enemies;
     char enemy, shielded, laser, 
     direction;
 
 } Enemy;
 
-Enemy enemy = {0, 0, 0, 0, 0, 'Y', 'O', '!', 'l'};
+Enemy enemy = {0, 0, 0, 0, 0, 1, 'Y', 'O', '!', 'l'};
 
 char world[SIZEY][SIZEX];
 char explosion = 'X';
@@ -57,6 +57,7 @@ void display_welcome(){
 }
 
 void init_world(){
+    // Atribui as posições de cada elemento no mundo.
     for (int x = 0; x < SIZEX; x++){
         for (int y = 0; y < SIZEY; y++){
             if ((y + 1) % 2 == 0 && y < 7 && x > 4 && x < SIZEX - 5 && x % 2 == 0){
@@ -64,7 +65,7 @@ void init_world(){
                 enemy.total_enemies++;
             } else if ((y + 1) % 2 == 0 && y >= 7 && y < 9 && x > 4 && x < SIZEX - 5 && x % 2 == 0){
                 world[y][x] = enemy.shielded;
-                enemy.total_enemies = enemy.total_enemies + 2;
+                enemy.total_enemies += 2;
             } else {
                 world[y][x] = ' ';
             }
@@ -79,8 +80,10 @@ void display_world(){
     // Obtem as dimensões da tela
     int maxY, maxX;
     getmaxyx(stdscr, maxY, maxX);
-
-    mvprintw(0, (maxX - 8) / 2, "SCORE: %d\n", player.score);
+    
+    // Exibe o contador de SCORE.
+    mvprintw(0, (maxX - 8) / 2, "SCORE: %d\n | Total enemies: %d\n", player.score);
+    // Define as bordas do mapa.
     for (int y = 0; y < SIZEY; y++) {
         mvprintw(y + 1, (maxX - SIZEX) / 2, "|");
         for (int x = 0; x < SIZEX; x++){
@@ -92,6 +95,7 @@ void display_world(){
 }
 
 void move_player(char keyPress){
+    // Movimenta o player de acordo a entrada do jogador.
     for (int x = 0; x < SIZEX; x++){
         if (world[SIZEY - 1][x + 1] == player.player && keyPress == 'a'){
             world[SIZEY - 1][x] = player.player;
@@ -117,7 +121,7 @@ void player_laser(char keyPress){
         }
     }
 
-    // Movimenta o laser o jogador pelo mundo.
+    // Movimenta o laser do jogador pelo mundo.
     for (int x = 0; x < SIZEX; x++){
         if (world[1][x] == player.laser){
             world[1][x] = ' ';
@@ -234,11 +238,25 @@ int enemies_laser(int i){
     }
 }
 
+int are_enemies_alive(){
+    for (int y = 0; y < SIZEY; y++){
+        for (int x = 0; x < SIZEX; x++){
+            if(world[y][x] == enemy.enemy || world[y][x] == enemy.shielded){
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 void update_board(int i){
     check_enemy_direction();
     update_enemies(i);
+    
+    // Verifica se há inimigos vivos.
+    enemy.has_enemies = are_enemies_alive();
 
+    // Verifica a morte de um jogador.
     int has_player = 0;
     for (int x = 0; x < SIZEX; x++){
         if (world[SIZEY - 1][x] == player.player){
@@ -253,15 +271,24 @@ void update_board(int i){
         player.defeat = 1;
     }
 
+
     for (int x = 0; x < SIZEX; x++){
         for (int y = 0; y < SIZEY; y++){
             
             // Verifica se o laser do jogador atingiu um inimigo.
             if (world[y][x] == player.laser && world[y - 1][x] == enemy.enemy){
                 world[y][x] = ' '; // Remove o laser da antiga posição.
-                world[y - 1][x] = explosion; // Inimigo morre.
-                enemy.current_enemies--;
-                player.score += 50;
+                world[y - 1][x] = explosion; // Inimigo morre. 
+                enemy.current_enemies--;           
+                if (x > SIZEX/1){
+                    player.score += 50;
+                } else if (x > SIZEX/2){
+                    player.score += 30;
+                } else if (x > SIZEX/3){
+                    player.score += 60;
+                } else if (x > SIZEX/4){
+                    player.score += 130;
+                }
             }
 
             // Verifica se o laser do jogador atingiu um inimigo com escudo.
@@ -269,7 +296,7 @@ void update_board(int i){
                 world[y][x] = ' '; 
                 world[y - 1][x] = enemy.enemy; // Inimigo com escudo vira um inimigo simples.
                 enemy.current_enemies--;
-                player.score += 25;
+                player.score += 50;
             }
             
             // Verifica se o laser do inimigo atingiu o laser jogador.
@@ -293,6 +320,10 @@ void update_board(int i){
                 player.defeat = 1;
                 break;
             }
+
+            if (enemy.current_enemies <= 0){
+                break;
+            }
         }
     }
 }
@@ -302,7 +333,8 @@ void finalize_game(){
 
     int maxY, maxX;
     getmaxyx(stdscr, maxY, maxX);
-
+    
+    // Exibe mensagem final;
     if (!player.defeat) {
         mvprintw((maxY / 2 + 1) - 4, (maxX / 2) - (24/2), "Bom trabalho, guerreiro!");
         refresh(); sleep(1);
