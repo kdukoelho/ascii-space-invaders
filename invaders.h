@@ -38,15 +38,15 @@ void display_welcome(){
     getmaxyx(stdscr, maxY, maxX);
 
     // Exibe as mensagens com um pequeno delay entre elas
-    mvprintw((maxY / 2) - 4 , (maxX / 2) - (20/2), "Bem vindo, guerreiro!");
+    mvprintw((maxY / 2) - 4 , (maxX / 2) - (21/2), "Bem vindo, guerreiro!");
     refresh(); sleep(1);
-    mvprintw((maxY / 2 + 1) - 4, (maxX / 2) - (40/2), "Seu sistema operacional esta em perigo.");
+    mvprintw((maxY / 2 + 1) - 4, (maxX / 2) - (39/2), "Seu sistema operacional esta em perigo.");
     refresh(); sleep(2);
-    mvprintw((maxY / 2 + 2) - 4, (maxX / 2) - (74/2), "Hackers invadiram o seu computador e enviaram uma orda de PROMPT INVADERS!");
+    mvprintw((maxY / 2 + 2) - 4, (maxX / 2) - (75/2), "Hackers invadiram o seu computador e enviaram uma horda de PROMPT INVADERS!");
     refresh(); sleep(2);
-    mvprintw((maxY / 2 + 3) - 4, (maxX / 2) - (50/2), "Derrote-os e evite o desligamento de sua maquina!");
+    mvprintw((maxY / 2 + 3) - 4, (maxX / 2) - (49/2), "Derrote-os e evite o desligamento de sua maquina!");
     refresh(); sleep(1);
-    mvprintw((maxY / 2 + 6) - 4, (maxX / 2) - (38/2), "Aperte qualquer tecla para continuar.");
+    mvprintw((maxY / 2 + 6) - 4, (maxX / 2) - (37/2), "Aperte qualquer tecla para continuar.");
     refresh();
 
     // Aguarda a entrada do usuario
@@ -82,7 +82,7 @@ void display_world(){
     getmaxyx(stdscr, maxY, maxX);
     
     // Exibe o contador de SCORE.
-    mvprintw(0, (maxX - 8) / 2, "SCORE: %d\n | Total enemies: %d\n", player.score);
+    mvprintw(0, (maxX - 8) / 2, "SCORE: %d\n", player.score);
     // Define as bordas do mapa.
     for (int y = 0; y < SIZEY; y++) {
         mvprintw(y + 1, (maxX - SIZEX) / 2, "|");
@@ -338,7 +338,7 @@ void finalize_game(){
     if (!player.defeat) {
         mvprintw((maxY / 2 + 1) - 4, (maxX / 2) - (24/2), "Bom trabalho, guerreiro!");
         refresh(); sleep(1);
-        mvprintw((maxY / 2 + 2) - 4, (maxX / 2) - (40/2), "A orda de PROMPT INVADERS foi derrotada!");
+        mvprintw((maxY / 2 + 2) - 4, (maxX / 2) - (40/2), "A horda de PROMPT INVADERS foi derrotada!");
         refresh(); sleep(2);
         mvprintw((maxY / 2 + 3) - 4, (maxX / 2) - (39/2), "Sua maquina agora, esta fora de perigo.");
         refresh(); sleep(5);
