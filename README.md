@@ -1,13 +1,31 @@
-﻿
-# ASCII INVADERS
+<h1 align="center"> ASCII INVADERS 
+![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
+![C](https://img.shields.io/badge/C-00599C?style=for-the-badge&logo=c&logoColor=white)<h1>
 
 ## Objective
-The player controls a spaceship with the objective of preventing alien ships from advancing through the map, avoiding being hit by their lasers and consequently preventing their own demise. The player's spaceship moves horizontally at the bottom of the map, while the invaders move horizontally. When they reach the horizontal boundaries of the map, they descend one row vertically and continue moving horizontally until they reach the opposite horizontal limit, repeating this process.
+The player controls a spaceship with the objective of preventing alien ships from advancing through the map, avoiding being hit by their lasers and consequently preventing their own demise. 
 
-## Compilation
-To compile the code, simply execute the `make` command in the terminal in the main directory. After compilation, the game will start immediately. To begin playing, execute the `make run` command or start the program directly by typing `./ASCII_Invaders`.
-The game only works in UNIX-like OS.
+## 🚀 Getting Started 
+
+Execute the in the terminal in the main directory to compile the code the following command;
+```shell
+make
+```
+ After compilation, the game will start immediately.
+ To begin playing after the compilation, execute: 
+  ```shell
+  make run
+  ```
+or start the game directly by using
+```shell
+./ASCII_Invaders
+```
+The game compilation only works in UNIX-like OS.
 
 ## How to Play
 Use the "a" key to move left and the "d" key to move right. Press "m" to fire your weapon.
+
+
+
+
 
