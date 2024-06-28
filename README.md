@@ -1,6 +1,4 @@
-<h1 align="center"> ASCII INVADERS 
-![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
-![C](https://img.shields.io/badge/C-00599C?style=for-the-badge&logo=c&logoColor=white)<h1>
+# ASCII INVADERS
 
 ## Objective
 The player controls a spaceship with the objective of preventing alien ships from advancing through the map, avoiding being hit by their lasers and consequently preventing their own demise. 
